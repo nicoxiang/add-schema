@@ -18,7 +18,7 @@ jobs:
           version: '6.8.1'
           host: 'windows'
           target: 'desktop'
-          arch: 'win64_mingw'
+          arch: 'win64_msvc2022_64'
       - name: Build
         run: |
           mkdir build
@@ -41,9 +41,7 @@ jobs:
           version: '6.8.1'
           host: 'linux'
           target: 'desktop'
-          arch: 'gcc_64'
-          dir: '${{github.workspace}}/qt'
-          install-deps: 'true'
+          arch: 'linux_gcc_64'
       - name: Install Dependencies
         run: |
           sudo apt-get update
@@ -71,8 +69,6 @@ jobs:
           host: 'mac'
           target: 'desktop'
           arch: 'clang_64'
-          dir: '${{github.workspace}}/qt'
-          install-deps: 'true'
       - name: Build
         run: |
           mkdir build
