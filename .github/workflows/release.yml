@@ -1,0 +1,87 @@
+name: Release Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag for release'
+        required: true
+        
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: '6.8.1'
+      - name: Build
+        run: |
+          mkdir build
+          cd build
+          cmake ..
+          cmake --build . --config Release
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: windows-build
+          path: build/Release/add_schema.exe
+
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: '6.8.1'
+      - name: Build
+        run: |
+          mkdir build
+          cd build
+          cmake ..
+          make
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: linux-build
+          path: build/add_schema
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: '6.8.1'
+      - name: Build
+        run: |
+          mkdir build
+          cd build
+          cmake ..
+          make
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: macos-build
+          path: build/add_schema.app
+
+  create-release:
+    needs: [build-windows, build-linux, build-macos]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v3
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.event.inputs.tag }}
+          name: Release ${{ github.event.inputs.tag }}
+          files: |
+            windows-build/*
+            linux-build/*
+            macos-build/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
