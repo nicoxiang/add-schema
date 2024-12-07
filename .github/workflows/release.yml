@@ -87,6 +87,9 @@ jobs:
     steps:
       - name: Download all artifacts
         uses: actions/download-artifact@v3
+      - name: Debug file structure
+        run: |
+          ls -R
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
