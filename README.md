@@ -1,4 +1,4 @@
-# 本项目所有内容均由cursor生成，自用
+# 本项目所有内容均由cursor生成
 
 # Add Schema 工具
 

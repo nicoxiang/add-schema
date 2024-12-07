@@ -10,11 +10,19 @@ set(CMAKE_AUTOUIC ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
 
-add_executable(add_schema
-    main.cpp
-    mainwindow.cpp
-    mainwindow.h
-)
+if(WIN32)
+    add_executable(add_schema WIN32
+        main.cpp
+        mainwindow.cpp
+        mainwindow.h
+    )
+else()
+    add_executable(add_schema
+        main.cpp
+        mainwindow.cpp
+        mainwindow.h
+    )
+endif()
 
 target_link_libraries(add_schema PRIVATE
     Qt6::Core
