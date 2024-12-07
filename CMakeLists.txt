@@ -21,3 +21,9 @@ target_link_libraries(add_schema PRIVATE
     Qt6::Gui
     Qt6::Widgets
 )
+
+IF (APPLE)
+    set_target_properties(add_schema PROPERTIES
+        MACOSX_BUNDLE TRUE
+    )
+ENDIF()
