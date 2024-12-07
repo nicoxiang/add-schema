@@ -74,7 +74,12 @@ jobs:
           mkdir build
           cd build
           cmake ..
-          cmake --build .
+          cmake --build . --config Release
+          ls -R
+      - name: Package macOS App
+        run: |
+          cd build
+          macdeployqt add_schema.app -dmg 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
