@@ -25,7 +25,7 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake .. -DCMAKE_PREFIX_PATH=${{ github.workspace }}/example
+          cmake .. -DCMAKE_PREFIX_PATH=${{ github.workspace }}/example -DCMAKE_EXE_LINKER_FLAGS="-static -static-libgcc -static-libstdc++"
           cmake --build . --config Release
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
