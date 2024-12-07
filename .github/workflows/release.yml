@@ -84,7 +84,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: macos-build
-          path: build/add_schema.app
+          path: build/add_schema.dmg
 
   create-release:
     needs: [build-windows, build-linux, build-macos]
