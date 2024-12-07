@@ -20,7 +20,6 @@ jobs:
           host: 'windows'
           target: 'desktop'
           arch: 'win64_msvc2022_64'
-          dir: '${{ github.workspace }}/example/'
       - name: Build
         run: |
           mkdir build
@@ -31,12 +30,16 @@ jobs:
         run: |
           cd build/Release
           windeployqt.exe add_schema.exe
-          ls -R
+      - name: Create ZIP file
+        run: |
+          cd build
+          $zipFile = "Release/add_schema.zip"
+          Compress-Archive -Path "Release/*" -DestinationPath $zipFile    
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
           name: windows-build
-          path: build/Release/*
+          path: build/Release/add_schema.zip
 
   build-linux:
     runs-on: ubuntu-latest
