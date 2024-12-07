@@ -23,6 +23,7 @@ target_link_libraries(add_schema PRIVATE
 )
 
 IF (APPLE)
+    message("Packaging for macOS")
     set_target_properties(add_schema PROPERTIES
         MACOSX_BUNDLE TRUE
     )
