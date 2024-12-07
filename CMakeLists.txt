@@ -12,10 +12,6 @@ find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
 
 if(WIN32)
     set(CMAKE_EXE_LINKER_FLAGS "-static")
-elseif(APPLE)
-    set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++ -lQt6Core -lQt6Gui -lQt6Widgets")
-elseif(UNIX)
-    set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++ -lQt6Core -lQt6Gui -lQt6Widgets")
 endif()
 
 add_executable(add_schema
@@ -29,8 +25,6 @@ target_link_libraries(add_schema PRIVATE
     Qt6::Gui
     Qt6::Widgets
 )
-
-set(CMAKE_EXE_LINKER_FLAGS "-static")
 
 IF (APPLE)
     message("Packaging for macOS")

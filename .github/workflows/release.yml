@@ -53,7 +53,7 @@ jobs:
           echo $RUNNER_WORKSPACE
           mkdir build
           cd build
-          cmake .. -DCMAKE_PREFIX_PATH=$RUNNER_WORKSPACE/Qt/6.8.1/gcc_64
+          cmake ..
           cmake --build . --config Release
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
@@ -77,7 +77,7 @@ jobs:
           echo $RUNNER_WORKSPACE
           mkdir build
           cd build
-          cmake .. -DCMAKE_PREFIX_PATH=$RUNNER_WORKSPACE/Qt/6.8.1/clang_64
+          cmake ..
           cmake --build . --config Release
       - name: Package macOS App
         run: |
