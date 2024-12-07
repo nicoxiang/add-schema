@@ -10,6 +10,14 @@ set(CMAKE_AUTOUIC ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
 
+if(WIN32)
+    set(CMAKE_EXE_LINKER_FLAGS "-static")
+elseif(APPLE)
+    set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++ -lQt6Core -lQt6Gui -lQt6Widgets")
+elseif(UNIX)
+    set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++ -lQt6Core -lQt6Gui -lQt6Widgets")
+endif()
+
 add_executable(add_schema
     main.cpp
     mainwindow.cpp

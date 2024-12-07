@@ -50,10 +50,11 @@ jobs:
           sudo apt-get install -y build-essential libgl1-mesa-dev
       - name: Build
         run: |
+          echo $RUNNER_WORKSPACE
           mkdir build
           cd build
-          cmake ..
-          make
+          cmake .. -DCMAKE_PREFIX_PATH=$RUNNER_WORKSPACE/Qt/6.8.1/gcc_64
+          cmake --build . --config Release
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
@@ -73,11 +74,11 @@ jobs:
           arch: 'clang_64'
       - name: Build
         run: |
+          echo $RUNNER_WORKSPACE
           mkdir build
           cd build
-          cmake ..
+          cmake .. -DCMAKE_PREFIX_PATH=$RUNNER_WORKSPACE/Qt/6.8.1/clang_64
           cmake --build . --config Release
-          ls -R
       - name: Package macOS App
         run: |
           cd build
