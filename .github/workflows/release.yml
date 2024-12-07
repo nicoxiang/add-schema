@@ -74,12 +74,12 @@ jobs:
           mkdir build
           cd build
           cmake ..
-          make
+          cmake --build . --config Release
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
           name: macos-build
-          path: build/add_schema.app
+          path: build/Release/add_schema.app
 
   create-release:
     needs: [build-windows, build-linux, build-macos]
