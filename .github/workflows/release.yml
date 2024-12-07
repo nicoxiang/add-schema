@@ -25,7 +25,7 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake .. -DCMAKE_PREFIX_PATH=${{ github.workspace }}/example -DCMAKE_EXE_LINKER_FLAGS="-static -static-libgcc -static-libstdc++"
+          cmake ..
           cmake --build . --config Release
       - name: Deploy Qt dependencies with windeployqt
         run: |
