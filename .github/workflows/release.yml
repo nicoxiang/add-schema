@@ -14,18 +14,18 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Install Qt
-        uses: jurplel/install-qt-action@v3
+        uses: jurplel/install-qt-action@v4
         with:
           version: '6.8.1'
           host: 'windows'
           target: 'desktop'
           arch: 'win64_msvc2022_64'
+          dir: '${{ github.workspace }}/example/'
       - name: Build
         run: |
-          echo $RUNNER_WORKSPACE
           mkdir build
           cd build
-          cmake .. -DCMAKE_PREFIX_PATH=$RUNNER_WORKSPACE/Qt/6.8.1/msvc2022_64_static
+          cmake .. -DCMAKE_PREFIX_PATH=${{ github.workspace }}/example
           cmake --build . --config Release
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
@@ -38,7 +38,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Install Qt
-        uses: jurplel/install-qt-action@v3
+        uses: jurplel/install-qt-action@v4
         with:
           version: '6.8.1'
           host: 'linux'
@@ -66,7 +66,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Install Qt
-        uses: jurplel/install-qt-action@v3
+        uses: jurplel/install-qt-action@v4
         with:
           version: '6.8.1'
           host: 'mac'
