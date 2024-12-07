@@ -10,16 +10,6 @@ set(CMAKE_AUTOUIC ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
 
-if(WIN32)
-    message("Packaging for Windows")
-    set(CMAKE_EXE_LINKER_FLAGS "-static")
-elseif(APPLE)
-    message("Packaging for macOS")
-    set_target_properties(add_schema PROPERTIES
-        MACOSX_BUNDLE TRUE
-    )    
-endif()
-
 add_executable(add_schema
     main.cpp
     mainwindow.cpp
@@ -31,3 +21,13 @@ target_link_libraries(add_schema PRIVATE
     Qt6::Gui
     Qt6::Widgets
 )
+
+if(WIN32)
+    message("Packaging for Windows")
+    set(CMAKE_EXE_LINKER_FLAGS "-static")
+elseif(APPLE)
+    message("Packaging for macOS")
+    set_target_properties(add_schema PROPERTIES
+        MACOSX_BUNDLE TRUE
+    )
+endif()
