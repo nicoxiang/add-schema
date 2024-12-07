@@ -22,9 +22,10 @@ jobs:
           arch: 'win64_msvc2022_64'
       - name: Build
         run: |
+          echo $RUNNER_WORKSPACE
           mkdir build
           cd build
-          cmake ..
+          cmake .. -DCMAKE_PREFIX_PATH=$RUNNER_WORKSPACE/Qt/6.8.1/msvc2022_64_static
           cmake --build . --config Release
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
