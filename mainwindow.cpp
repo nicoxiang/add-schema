@@ -64,7 +64,7 @@ QString MainWindow::addSchemaToSql(const QString &sql, const QString &schema) {
     // 匹配表名的正则表达式模式
     QStringList patterns = {
         R"((?i)(FROM|JOIN|UPDATE|INTO)\s+(`?\w+`?))",  // FROM table, JOIN table, UPDATE table, INTO table
-        R"((?i)(CREATE|ALTER|DROP)\s+(?:TABLE|VIEW|TRIGGER|PROCEDURE|FUNCTION)\s+(`?\w+`?))", // DDL语句
+        R"((?i)(CREATE|ALTER|DROP)\s+(TABLE|VIEW|TRIGGER|PROCEDURE|FUNCTION)\s+(`?\w+`?))", // DDL语句
         R"((?i)(INSERT\s+INTO)\s+(`?\w+`?))"  // INSERT INTO table
     };
     
@@ -74,11 +74,20 @@ QString MainWindow::addSchemaToSql(const QString &sql, const QString &schema) {
         
         while (i.hasNext()) {
             QRegularExpressionMatch match = i.next();
-            QString tableName = match.captured(2);
-            // 如果表名没有schema前缀，添加schema
-            if (!tableName.contains(".")) {
-                QString replacement = match.captured(1) + " " + schema + "." + tableName;
+            QString tableName;
+            if (pattern.contains("CREATE|ALTER|DROP")) {
+                tableName = match.captured(3);
+                // 保留关键字(TABLE等)
+                QString keyword = match.captured(2);
+                QString replacement = match.captured(1) + " " + keyword + " " + schema + "." + tableName;
                 modifiedSql.replace(match.captured(0), replacement);
+            } else {
+                tableName = match.captured(2);
+                // 如果表名没有schema前缀，添加schema
+                if (!tableName.contains(".")) {
+                    QString replacement = match.captured(1) + " " + schema + "." + tableName;
+                    modifiedSql.replace(match.captured(0), replacement);
+                }
             }
         }
     }
