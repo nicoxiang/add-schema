@@ -63,7 +63,9 @@ QString MainWindow::addSchemaToSql(const QString &sql, const QString &schema) {
     
     // 匹配表名的正则表达式模式
     QStringList patterns = {
-        R"((?i)(FROM|JOIN|UPDATE|INTO)\s+(`?\w+`?))",  // FROM table, JOIN table, UPDATE table, INTO table
+        // 修改UPDATE匹配模式，排除ON UPDATE CURRENT_TIMESTAMP的情况
+        R"((?i)(?<!ON\s)UPDATE\s+(`?\w+`?))",  // UPDATE table，但不匹配ON UPDATE
+        R"((?i)(FROM|JOIN|INTO)\s+(`?\w+`?))",  // FROM table, JOIN table, INTO table
         R"((?i)(CREATE|ALTER|DROP)\s+(TABLE|VIEW|TRIGGER|PROCEDURE|FUNCTION)\s+(`?\w+`?))", // DDL语句
         R"((?i)(INSERT\s+INTO)\s+(`?\w+`?))"  // INSERT INTO table
     };
@@ -81,6 +83,13 @@ QString MainWindow::addSchemaToSql(const QString &sql, const QString &schema) {
                 QString keyword = match.captured(2);
                 QString replacement = match.captured(1) + " " + keyword + " " + schema + "." + tableName;
                 modifiedSql.replace(match.captured(0), replacement);
+            } else if (pattern.contains("UPDATE") && !pattern.contains("ON UPDATE")) {
+                // 处理UPDATE语句
+                tableName = match.captured(1);
+                if (!tableName.contains(".")) {
+                    QString replacement = "UPDATE " + schema + "." + tableName;
+                    modifiedSql.replace(match.captured(0), replacement);
+                }
             } else {
                 tableName = match.captured(2);
                 // 如果表名没有schema前缀，添加schema
