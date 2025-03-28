@@ -36,7 +36,7 @@ jobs:
           $zipFile = "Release/add_schema.zip"
           Compress-Archive -Path "Release/*" -DestinationPath $zipFile    
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: windows-build
           path: build/Release/add_schema.zip
@@ -64,7 +64,7 @@ jobs:
           cmake ..
           cmake --build . --config Release
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: linux-build
           path: build/add_schema
@@ -92,7 +92,7 @@ jobs:
           cd build
           macdeployqt add_schema.app -dmg 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: macos-build
           path: build/add_schema.dmg
