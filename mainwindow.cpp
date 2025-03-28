@@ -201,7 +201,7 @@ void MainWindow::generateSql() {
                                 foundEndQuote = true;
                                 // 如果找到结束引号且当前位置后面有分号，则这是真正的语句结束
                                 if(j < currentStatement.length() - 1 && currentStatement.indexOf(';', j) != -1) {
-                                    sqlStatements.append(currentStatement.trimmed());
+                                    sqlStatements.append(currentStatement.trimmed().chopped(1)); // 移除末尾分号
                                     currentStatement.clear();
                                 }
                                 break;
@@ -215,7 +215,7 @@ void MainWindow::generateSql() {
                 }
             } else {
                 // 不在COMMENT子句中，正常分割
-                sqlStatements.append(currentStatement.trimmed());
+                sqlStatements.append(currentStatement.trimmed().chopped(1)); // 移除末尾分号
                 currentStatement.clear();
             }
         }
