@@ -14,7 +14,7 @@ class MySQLAddSchemaApp(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("MySQL Add Schema工具")
-        self.geometry("800x600")
+        self.geometry("800x700")
         self.selected_file = ""
         self.selected_schemas = []
         self.schema_vars = []
@@ -60,29 +60,53 @@ class MySQLAddSchemaApp(tk.Tk):
         self.load_schemas()
 
     def _bind_mousewheel(self, widget):
-        # 兼容Windows和Mac/Linux的鼠标滚轮事件绑定
-        if widget.winfo_class() == 'Canvas':
-            widget.bind_all("<MouseWheel>", self._on_mousewheel)
-            widget.bind_all("<Button-4>", self._on_mousewheel)  # Linux
-            widget.bind_all("<Button-5>", self._on_mousewheel)  # Linux
-        else:
-            widget.bind("<Enter>", lambda e: self._bind_mousewheel(widget))
-            widget.bind("<Leave>", lambda e: self._unbind_mousewheel(widget))
+        # 只在内容超出时绑定鼠标滚轮
+        widget.bind("<Enter>", self._maybe_bind_mousewheel)
+        widget.bind("<Leave>", self._maybe_unbind_mousewheel)
 
-    def _unbind_mousewheel(self, widget):
-        if widget.winfo_class() == 'Canvas':
-            widget.unbind_all("<MouseWheel>")
-            widget.unbind_all("<Button-4>")
-            widget.unbind_all("<Button-5>")
+    def _maybe_bind_mousewheel(self, event):
+        # 判断内容是否超出可视区域，超出才绑定
+        canvas = event.widget
+        if not isinstance(canvas, tk.Canvas):
+            return
+        bbox = canvas.bbox("all")
+        if bbox is None:
+            return
+        content_height = bbox[3] - bbox[1]
+        visible_height = canvas.winfo_height()
+        if content_height > visible_height:
+            # 绑定滚轮
+            canvas.bind_all("<MouseWheel>", self._on_mousewheel)
+            canvas.bind_all("<Button-4>", self._on_mousewheel)  # Linux
+            canvas.bind_all("<Button-5>", self._on_mousewheel)  # Linux
+        else:
+            # 解绑滚轮
+            canvas.unbind_all("<MouseWheel>")
+            canvas.unbind_all("<Button-4>")
+            canvas.unbind_all("<Button-5>")
+
+    def _maybe_unbind_mousewheel(self, event):
+        canvas = event.widget
+        if not isinstance(canvas, tk.Canvas):
+            return
+        canvas.unbind_all("<MouseWheel>")
+        canvas.unbind_all("<Button-4>")
+        canvas.unbind_all("<Button-5>")
 
     def _on_mousewheel(self, event):
-        # 兼容Windows、Mac和Linux的滚动
+        # 只在内容超出时允许滚动
+        bbox = self.schema_canvas.bbox("all")
+        if bbox is None:
+            return
+        content_height = bbox[3] - bbox[1]
+        visible_height = self.schema_canvas.winfo_height()
+        if content_height <= visible_height:
+            return  # 不允许滚动
         if event.num == 4:  # Linux scroll up
             self.schema_canvas.yview_scroll(-1, "units")
         elif event.num == 5:  # Linux scroll down
             self.schema_canvas.yview_scroll(1, "units")
         else:
-            # Windows和Mac
             delta = event.delta
             if delta == 0:
                 return
