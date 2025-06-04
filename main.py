@@ -41,6 +41,9 @@ class MySQLAddSchemaApp(tk.Tk):
         self.schema_canvas.pack(side="left", fill="both", expand=True)
         self.schema_scrollbar.pack(side="right", fill="y")
 
+        # 绑定鼠标滚轮事件到canvas
+        self._bind_mousewheel(self.schema_canvas)
+
         # 全选勾选框变量
         self.select_all_var = tk.BooleanVar()
         # 全选勾选框（放在schema_inner的最上方，与其他勾选框y轴对齐）
@@ -56,6 +59,37 @@ class MySQLAddSchemaApp(tk.Tk):
         self.confirm_btn.pack(fill=tk.X, padx=10, pady=10)
         self.load_schemas()
 
+    def _bind_mousewheel(self, widget):
+        # 兼容Windows和Mac/Linux的鼠标滚轮事件绑定
+        if widget.winfo_class() == 'Canvas':
+            widget.bind_all("<MouseWheel>", self._on_mousewheel)
+            widget.bind_all("<Button-4>", self._on_mousewheel)  # Linux
+            widget.bind_all("<Button-5>", self._on_mousewheel)  # Linux
+        else:
+            widget.bind("<Enter>", lambda e: self._bind_mousewheel(widget))
+            widget.bind("<Leave>", lambda e: self._unbind_mousewheel(widget))
+
+    def _unbind_mousewheel(self, widget):
+        if widget.winfo_class() == 'Canvas':
+            widget.unbind_all("<MouseWheel>")
+            widget.unbind_all("<Button-4>")
+            widget.unbind_all("<Button-5>")
+
+    def _on_mousewheel(self, event):
+        # 兼容Windows、Mac和Linux的滚动
+        if event.num == 4:  # Linux scroll up
+            self.schema_canvas.yview_scroll(-1, "units")
+        elif event.num == 5:  # Linux scroll down
+            self.schema_canvas.yview_scroll(1, "units")
+        else:
+            # Windows和Mac
+            delta = event.delta
+            if delta == 0:
+                return
+            if os.name == "nt":
+                self.schema_canvas.yview_scroll(-1 * int(delta / 120), "units")
+            else:
+                self.schema_canvas.yview_scroll(-1 * int(delta), "units")
 
     @staticmethod
     def show_warning(message):
