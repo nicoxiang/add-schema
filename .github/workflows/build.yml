@@ -60,11 +60,18 @@ jobs:
       - name: Build Mac App Bundle
         run: |
           pyinstaller --noconfirm --windowed main.py --name MySQLAddSchema
-      - name: Upload Mac App Bundle
+      - name: Create .dmg file
+        run: |
+          mkdir -p build_dmg
+          cp -R dist/MySQLAddSchema.app build_dmg/
+          hdiutil create -volname "MySQLAddSchema" \
+            -srcfolder "build_dmg" \
+            -ov -format UDZO MySQLAddSchema.dmg
+      - name: Upload DMG
         uses: actions/upload-artifact@v4
         with:
           name: macos-build
-          path: dist/MySQLAddSchema.app
+          path: MySQLAddSchema.dmg
 
 
   create-release:
