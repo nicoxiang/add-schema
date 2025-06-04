@@ -1,6 +1,8 @@
 import unittest
 from sql_utils import split_sql_statements, add_schema_to_sql
 
+
+# noinspection SqlNoDataSourceInspection
 class TestSQLLogic(unittest.TestCase):
     def setUp(self):
         self.schema = "myschema"

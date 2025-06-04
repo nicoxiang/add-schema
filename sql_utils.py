@@ -5,7 +5,7 @@ from sqlglot import parse_one, exp
 def split_sql_statements(sql_content):
     # 使用sqlglot自带的split方法，能正确处理分号、字符串、注释等
     statements = []
-    for stmt in sqlglot.transpile(sql_content, read="mysql", pretty=True):
+    for stmt in sqlglot.transpile(sql_content, read="mysql", pretty=True, comments=False):
         s = stmt.strip()
         if s:
             statements.append(s)
