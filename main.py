@@ -5,6 +5,7 @@ from tkinter import filedialog, messagebox, ttk
 
 from sqlglot.errors import *
 
+from sql_exceptions import UnsupportedSQLError
 from sql_utils import (
     split_sql_statements,
     add_schema_to_sql,
@@ -190,6 +191,8 @@ class MySQLAddSchemaApp(tk.Tk):
             messagebox.showinfo("成功", "文件生成成功！\n输出文件: " + output_file_name)
         except (ParseError, TokenError, OptimizeError):
             self.show_warning("源SQL文件解析失败！")
+        except UnsupportedSQLError:
+            self.show_warning("存在无法解析的SQL！")
         except PermissionError:
             self.show_warning("写入目标SQL文件权限不足！")
         except OSError:

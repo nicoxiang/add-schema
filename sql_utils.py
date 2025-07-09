@@ -1,6 +1,8 @@
 import sqlglot
 from sqlglot import parse_one, exp
 
+from sql_exceptions import UnsupportedSQLError
+
 
 def split_sql_statements(sql_content):
     # 使用sqlglot自带的split方法，能正确处理分号、字符串、注释等
@@ -13,6 +15,9 @@ def split_sql_statements(sql_content):
 
 def add_schema_to_sql(sql, schema):
     tree = parse_one(sql, read="mysql")
+
+    if isinstance(tree, exp.Command):
+        raise UnsupportedSQLError("SQL语法暂未支持")
 
     def _add_schema_to_table(table_obj):
         if isinstance(table_obj, exp.Table):
