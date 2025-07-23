@@ -1,6 +1,5 @@
 import unittest
 
-from sql_exceptions import UnsupportedSQLError
 from sql_utils import split_sql_statements, add_schema_to_sql
 
 
@@ -60,16 +59,31 @@ class TestSQLLogic(unittest.TestCase):
         self.assertIn(f"UPDATE {self.schema}.mytable", result)
 
     def test_alter_table_change(self):
-        sql = "ALTER TABLE t1 CHANGE old_col new_col INT;"
-        expected = f"ALTER TABLE {self.schema}.t1 CHANGE old_col new_col INT;"
+        sql = "ALTER TABLE t1 CHANGE old_col new_col INT"
+        expected = f"ALTER TABLE {self.schema}.t1 CHANGE old_col new_col INT"
         stmts = split_sql_statements(sql)
         self.assertEqual(len(stmts), 1)
-        try:
-            result = add_schema_to_sql(stmts[0], self.schema)
-            self.assertIn(f"ALTER TABLE {self.schema}.t1", result)
-            self.assertIn("CHANGE old_col new_col INT", result)
-        except UnsupportedSQLError:
-            print("遇到不支持的ALTER语法，已跳过")
+        result = add_schema_to_sql(stmts[0], self.schema)
+        self.assertEqual(result, expected)
+
+    def test_alter_table_modify(self):
+        sql = "ALTER TABLE t1 MODIFY COLUMN col INT NULL COMMENT 'test-comment'"
+        expected = f"ALTER TABLE {self.schema}.t1 MODIFY COLUMN col INT NULL COMMENT 'test-comment'"
+        stmts = split_sql_statements(sql)
+        self.assertEqual(len(stmts), 1)
+        result = add_schema_to_sql(stmts[0], self.schema)
+        self.assertEqual(result, expected)
+
+    def test_alter_table_modify_with_comments(self):
+        sql = """
+        -- modify column comment
+        ALTER TABLE t1 MODIFY COLUMN col INT NULL COMMENT 'test-comment'
+        """
+        expected = f"ALTER TABLE {self.schema}.t1 MODIFY COLUMN col INT NULL COMMENT 'test-comment'"
+        stmts = split_sql_statements(sql)
+        self.assertEqual(len(stmts), 1)
+        result = add_schema_to_sql(stmts[0], self.schema)
+        self.assertEqual(result, expected)
 
 if __name__ == "__main__":
     unittest.main()
