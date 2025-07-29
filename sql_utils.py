@@ -49,13 +49,18 @@ def add_schema_to_sql(sql, schema):
     return tree.sql(dialect="mysql")
 
 def modify_sql_manually(sql: str, schema: str) -> str | None:
-    # 是否包含 ALTER TABLE + MODIFY COLUMN 或 CHANGE
-    if re.match(r"(?i)ALTER\s+TABLE\s+\w+\s+(MODIFY\s+COLUMN|CHANGE)\s+", sql):
-        # 插入 schema 到表名位置
+    # 去除换行和多余空白
+    sql_clean = ' '.join(sql.strip().split())
+
+    # 只要包含 ALTER TABLE 并至少包含 MODIFY COLUMN / CHANGE / ADD COLUMN 就认为是需要处理的
+    pattern = r"(?i)^ALTER\s+TABLE\s+(`?\w+`?)\s+.*?\b(MODIFY\s+COLUMN|CHANGE|ADD\s+COLUMN)\b"
+
+    if re.match(pattern, sql_clean):
+        # 插入 schema 到 ALTER TABLE 后的表名中
         modified_sql = re.sub(
-            r"(?i)(ALTER\s+TABLE\s+)(\w+)",  # 匹配 ALTER TABLE 后的表名
+            r"(?i)(ALTER\s+TABLE\s+)(`?\w+`?)",
             lambda m: f"{m.group(1)}{schema}.{m.group(2)}",
-            sql,
+            sql_clean,
             count=1
         )
         return modified_sql
