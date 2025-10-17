@@ -53,7 +53,7 @@ def modify_sql_manually(sql: str, schema: str) -> str | None:
     sql_clean = ' '.join(sql.strip().split())
 
     # 只要包含 ALTER TABLE 并至少包含 MODIFY COLUMN / CHANGE / ADD COLUMN 就认为是需要处理的
-    pattern = r"(?i)^ALTER\s+TABLE\s+(`?\w+`?)\s+.*?\b(MODIFY\s+COLUMN|CHANGE|ADD\s+COLUMN)\b"
+    pattern = r"(?i)^ALTER\s+TABLE\s+(`?\w+`?)\s+.*?\b(MODIFY\s+COLUMN|CHANGE|ADD\s+COLUMN|DROP\s+COLUMN)\b"
 
     if re.match(pattern, sql_clean):
         # 插入 schema 到 ALTER TABLE 后的表名中
