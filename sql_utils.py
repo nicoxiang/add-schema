@@ -1,9 +1,14 @@
-import re
+from functools import lru_cache
+
+from antlr4.InputStream import InputStream
+from antlr4.CommonTokenStream import CommonTokenStream
+from antlr4.tree.Tree import ParseTreeWalker
 
 import sqlglot
-from sqlglot import parse_one, exp
 
-from sql_exceptions import UnsupportedSQLError
+from MySqlLexer import MySqlLexer
+from MySqlParser import MySqlParser
+from schema_modifier_listener import SchemaModifierListener
 
 
 def split_sql_statements(sql_content):
@@ -16,52 +21,37 @@ def split_sql_statements(sql_content):
     return statements
 
 def add_schema_to_sql(sql, schema):
-    tree = parse_one(sql, read="mysql")
+    """
+    使用 ANTLR MySQL 解析器解析 SQL，并在表名前添加 schema 前缀。
+    """
+    replacements = _get_table_replacements(sql)
 
-    if isinstance(tree, exp.Command):
-        manually_modify_result =  modify_sql_manually(sql, schema)
-        if manually_modify_result is not None:
-            return manually_modify_result
-        else:
-            raise UnsupportedSQLError("SQL语法暂未支持")
+    if not replacements:
+        return sql
 
-    def _add_schema_to_table(table_obj):
-        if isinstance(table_obj, exp.Table):
-            if not table_obj.args.get("db"):
-                table_obj.set("db", exp.Identifier(this=schema))
-        return table_obj
+    # 从后往前替换，避免索引错位
+    result = sql
+    for start, stop, table_name in sorted(replacements, key=lambda x: -x[0]):
+        result = result[:start] + f"{schema}.{table_name}" + result[stop + 1:]
+    return result
 
-    # 遍历所有Table节点
-    for table in tree.find_all(exp.Table):
-        _add_schema_to_table(table)
 
-    # 处理CREATE/ALTER/DROP等DDL语句的对象名
-    for node in tree.find_all(exp.Create):
-        if isinstance(node.this, exp.Table) and not node.this.args.get("db"):
-            node.this.set("db", exp.Identifier(this=schema))
-    for node in tree.find_all(exp.Alter):
-        if isinstance(node.this, exp.Table) and not node.this.args.get("db"):
-            node.this.set("db", exp.Identifier(this=schema))
-    for node in tree.find_all(exp.Drop):
-        if isinstance(node.this, exp.Table) and not node.this.args.get("db"):
-            node.this.set("db", exp.Identifier(this=schema))
+@lru_cache(maxsize=256)
+def _get_table_replacements(sql: str) -> tuple[tuple[int, int, str], ...]:
+    """
+    解析 SQL，返回所有需要添加 schema 的表的起止位置及原始表名。
+    结果使用 LRU 缓存，避免对相同 SQL 重复解析。
+    """
+    input_stream = InputStream(sql)
+    lexer = MySqlLexer(input_stream)
+    token_stream = CommonTokenStream(lexer)
+    token_stream.fill()
 
-    return tree.sql(dialect="mysql")
+    parser = MySqlParser(token_stream)
+    tree = parser.root()
 
-def modify_sql_manually(sql: str, schema: str) -> str | None:
-    # 去除换行和多余空白
-    sql_clean = ' '.join(sql.strip().split())
+    listener = SchemaModifierListener()
+    walker = ParseTreeWalker()
+    walker.walk(listener, tree)
 
-    # 只要包含 ALTER TABLE 并至少包含 MODIFY COLUMN / CHANGE / ADD COLUMN 就认为是需要处理的
-    pattern = r"(?i)^ALTER\s+TABLE\s+(`?\w+`?)\s+.*?\b(MODIFY\s+COLUMN|CHANGE|ADD\s+COLUMN|DROP\s+COLUMN)\b"
-
-    if re.match(pattern, sql_clean):
-        # 插入 schema 到 ALTER TABLE 后的表名中
-        modified_sql = re.sub(
-            r"(?i)(ALTER\s+TABLE\s+)(`?\w+`?)",
-            lambda m: f"{m.group(1)}{schema}.{m.group(2)}",
-            sql_clean,
-            count=1
-        )
-        return modified_sql
-    return None
+    return tuple(listener.replacements)
